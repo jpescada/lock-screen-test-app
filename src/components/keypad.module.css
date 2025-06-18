@@ -1,0 +1,36 @@
+.keypad {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  column-gap: 24px;
+  row-gap: 20px;
+  justify-items: center ;
+  width: fit-content;
+  height: 100%;
+  margin-top: 20px;
+}
+
+.button {
+  width: 70px;
+  height: 70px;
+  border: 1px solid lightgrey;
+  background-color: white;
+  border-radius: 50%;
+  color: black;
+  font-size: 2rem;
+  cursor: pointer;
+
+  &:hover {
+    background-color: lightgrey;
+  }
+
+  &:active {
+    background-color: black;
+    color: white;
+  }
+  
+  &:disabled {
+    background-color: lightgrey;
+    color: darkgrey;
+    cursor: not-allowed;
+  }
+}

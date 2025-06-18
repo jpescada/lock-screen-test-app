@@ -1,95 +1,115 @@
-import Image from "next/image";
+'use client';
+
+import { useState, useEffect } from 'react';
 import styles from "./page.module.css";
+import Keypad from '@/components/keypad';
+import PinMask from '@/components/pinmask';
 
 export default function Home() {
-  return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol>
-          <li>
-            Get started by editing <code>src/app/page.tsx</code>.
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+  const [pin, setPin] = useState<string[]>(Array(4).fill(''));
+  const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [validated, setValidated] = useState<boolean>(false);
+  const [attempts, setAttempts] = useState<number>(0);
+  const [isLocked, setIsLocked] = useState<boolean>(false);
+  const [lockTime, setLockTime] = useState<number>(0);
 
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-            className={styles.secondary}
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className={styles.footer}>
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (isLocked && lockTime > 0) {
+      timer = setInterval(() => {
+        setLockTime((t) => {
+          if (t <= 1) {
+            setIsLocked(false);
+            setAttempts(0);
+            clearInterval(timer);
+            setError(null);
+            return 0;
+          }
+          return t - 1;
+        });
+      }, 1000);
+    }
+    return () => clearInterval(timer);
+  }, [isLocked, lockTime]);
+
+  const handleKeyPress = (key: string) => {
+    if (isLocked || isLoading) return;
+    setError(null);
+
+    if (key.toUpperCase() === 'X') {
+      setPin(prev => {
+        const newPin = [...prev];
+        const lastFilledIndex = newPin.findLastIndex(digit => digit !== '');
+        if (lastFilledIndex !== -1) {
+          newPin[lastFilledIndex] = '';
+        }
+        return newPin;
+      });
+      return;
+    }
+
+    setPin(prev => {
+      const newPin = [...prev];
+      const firstEmptyIndex = newPin.indexOf('');
+      if (firstEmptyIndex !== -1) {
+        newPin[firstEmptyIndex] = key;
+      }
+      if (newPin.every(digit => digit !== '')) {
+        validatePin(newPin);
+      }
+      return newPin;
+    });
+  };
+
+  const validatePin = async (pin: string[]) => {
+    setIsLoading(true);
+
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
+    if (pin.join('') === '1234') {
+      setValidated(true);
+      setPin(Array(4).fill(''));
+    } else {
+      const newAttempts = attempts + 1;
+      setAttempts(newAttempts);
+      if (newAttempts >= 3) {
+        setIsLocked(true);
+        setLockTime(30);
+        setError('You entered the wrong code 3 times.');
+      } else {
+        setError(`Incorrect code. Try again.`);
+      }
+      setPin(Array(4).fill(''));
+    }
+
+    setIsLoading(false);
+  };
+
+  return (
+    <div className={styles.main}>
+      <div className={styles.container}>
+        {validated && (
+          <div className={styles.welcome}>
+            <h1>Welcome!</h1>
+            <p>You entered the correct PIN code</p>
+          </div>
+        )}
+
+        {!validated && (
+          <div className={styles.blocked}>
+            <h2>Enter your code</h2>
+            <PinMask pin={pin} />
+            <div className={styles.error}>
+              {error}
+              {isLocked && lockTime > 0 && (
+                <div>Please wait {lockTime} {lockTime === 1 ? 'second' : 'seconds'} before trying again.</div>
+              )}
+            </div>
+            <Keypad onKeyPress={handleKeyPress} isLoading={isLoading || isLocked} />
+          </div>
+        )}
+      </div>
     </div>
   );
 }
