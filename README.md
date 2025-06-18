@@ -1,4 +1,19 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Lock Screen Test App
+
+This app was created as a technical test for a role of fullstack developer with frontend focus.  
+The goal was to build a lock screen for a web app using React, with an emphasis on writing clean, modular code using CSS and TypeScript.
+
+Some of the requirements were: 
+- The app should display a keypad with numbers from 0 to 9 and "X";
+- The user should be able to input a 4 digits passcode using the keypad;
+- Once all digits are inputed the passcode should be validate against a predefined passcode;
+- Pressing the X button should delete the last digit;
+- A success screen should be displayed if the passcode is correct;
+- An error message should be displayed if the passcode is incorrect.
+
+A Figma design file was provided showing the layout and screens required.
+
+This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).  
 
 ## Getting Started
 
