@@ -7,7 +7,7 @@ The goal was to build a lock screen for a web app using React, with an emphasis 
 
 📋 Some of the requirements were: 
 - The app should display a keypad with numbers from 0 to 9 and "X";
-- The user should be able to input a 4 digits passcode using the keypad;
+- The user should be able to input a 4 digits passcode using the keypad (eg: 1234);
 - Once all digits are inputed the passcode should be validate against a predefined passcode;
 - Pressing the X button should delete the last digit;
 - A success screen should be displayed if the passcode is correct;
